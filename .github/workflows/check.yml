@@ -2,15 +2,15 @@ name: Beyblade Stock Checker
 
 on:
   schedule:
-    # Runs every 2 hours
-    - cron: '0 */2 * * *'
-  workflow_dispatch: # Allows you to trigger manually from GitHub UI
+    # Runs every 5 minutes (GitHub's minimum allowed cron interval)
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allows manual run button in Actions tab
 
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repo
         uses: actions/checkout@v4
 
       - name: Set up Python
