@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 from playwright.sync_api import sync_playwright
 
 # Update keyword if you are searching for '爆旋陀螺' or 'Takara Tomy'
-TARGET_KEYWORD = "Takara"
+TARGET_KEYWORD = "BX-53"
 URLS = [
     "https://www.toysrus.com.hk/zh-hk/whats-on/new-arrivals/pre-order/",
     "https://www.hobbylandeshop.com/product-category/nproduct_booking",
