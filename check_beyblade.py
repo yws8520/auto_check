@@ -6,7 +6,7 @@ import requests
 from playwright.sync_api import sync_playwright
 
 # List of target keywords to search for
-TARGET_KEYWORDS = ["爆旋陀螺", "BX-52", "BX-53","Tomy"]
+TARGET_KEYWORDS = ["爆旋陀螺", "BX-52", "BX-53"]
 
 URLS = [
     "https://www.toysrus.com.hk/zh-hk/whats-on/new-arrivals/pre-order/",
