@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 from playwright.sync_api import sync_playwright
 
 # Update keyword if you are searching for '爆旋陀螺' or 'Takara Tomy'
-TARGET_KEYWORD = "BX-53"
+TARGET_KEYWORD = "Pokemon"
 URLS = [
     "https://www.toysrus.com.hk/zh-hk/whats-on/new-arrivals/pre-order/",
     "https://www.hobbylandeshop.com/product-category/nproduct_booking",
@@ -13,7 +13,7 @@ URLS = [
 
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
 SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD")
-RECEIVER_EMAIL = "yws1024@gmail.com"
+RECEIVER_EMAILS = ["yws1024@gmail.com", "yws1024@gmail.com"]
 
 
 def send_email(found_urls):
@@ -31,15 +31,17 @@ def send_email(found_urls):
 
     msg = MIMEMultipart()
     msg["From"] = SENDER_EMAIL
-    msg["To"] = RECEIVER_EMAIL
+    # Join the email list into a single comma-separated string for the header
+    msg["To"] = ", ".join(RECEIVER_EMAILS)
     msg["Subject"] = subject
     msg.attach(MIMEText(body, "plain", "utf-8"))
 
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
-            server.send_message(msg)
-        print(f"[EMAIL SUCCESS] Alert email sent to {RECEIVER_EMAIL}")
+            # Pass the RECEIVER_EMAILS list directly here so Gmail sends to all recipients
+            server.send_message(msg, to_addrs=RECEIVER_EMAILS)
+        print(f"[EMAIL SUCCESS] Alert email sent to {', '.join(RECEIVER_EMAILS)}")
     except Exception as e:
         print(f"[EMAIL ERROR] Failed to send email: {e}")
 
