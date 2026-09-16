@@ -1,14 +1,50 @@
 import os
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from bs4 import BeautifulSoup
 import requests
 
-TARGET_KEYWORD = "爆旋陀螺"
+TARGET_KEYWORD = "Takara Tomy"
 URLS = [
     "https://www.toysrus.com.hk/zh-hk/beyblade/",
     "https://www.hobbylandeshop.com/product-category/nproduct_booking",
 ]
 
-WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK")
+# Email Configuration from Environment Variables
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
+SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD")  # Gmail App Password
+RECEIVER_EMAIL = "yws1024@gmail.com"
+
+
+def send_email(found_urls):
+    if not SENDER_EMAIL or not SENDER_PASSWORD:
+        print("[EMAIL ERROR] SENDER_EMAIL or SENDER_PASSWORD secret missing.")
+        return
+
+    links_str = "\n".join(found_urls)
+    subject = f"🎯 Found '{TARGET_KEYWORD}' Stock Alert!"
+    body = (
+        f"The keyword '{TARGET_KEYWORD}' was detected on the following page(s):\n\n"
+        f"{links_str}\n\n"
+        f"Check them quickly before stock runs out!"
+    )
+
+    msg = MIMEMultipart()
+    msg["From"] = SENDER_EMAIL
+    msg["To"] = RECEIVER_EMAIL
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain", "utf-8"))
+
+    try:
+        # Connect to Gmail SMTP Server (SSL on port 465)
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            server.send_message(msg)
+        print(f"[EMAIL SUCCESS] Alert email sent to {RECEIVER_EMAIL}")
+    except Exception as e:
+        print(f"[EMAIL ERROR] Failed to send email: {e}")
+
 
 headers = {
     "User-Agent": (
@@ -36,16 +72,13 @@ for url in URLS:
             else:
                 print(f"[NOT FOUND] {TARGET_KEYWORD} not present at: {url}")
         else:
-            print(f"[ERROR] Failed to fetch {url} (Status: {response.status_code})")
+            print(
+                f"[ERROR] Failed to fetch {url} (Status: {response.status_code})"
+            )
 
     except Exception as e:
         print(f"[EXCEPTION] Could not reach {url}: {e}")
 
-# Send Discord notification if keyword is found on any site
-if found_urls and WEBHOOK_URL:
-    links_str = "\n".join(found_urls)
-    message = (
-        f"🎯 **Found '{TARGET_KEYWORD}'!**\n"
-        f"The term was detected on the following page(s):\n{links_str}"
-    )
-    requests.post(WEBHOOK_URL, json={"content": message})
+# Send Email if keyword found
+if found_urls:
+    send_email(found_urls)
