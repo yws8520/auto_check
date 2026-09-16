@@ -6,8 +6,8 @@ from playwright.sync_api import sync_playwright
 
 TARGET_KEYWORD = "Takara Tomy"  # Or "爆旋陀螺"
 URLS = [
-    "https://www.toysrus.com.hk/zh-hk/beyblade/",
     "https://www.hobbylandeshop.com/product-category/nproduct_booking",
+    "https://www.toysrus.com.hk/zh-hk/whats-on/new-arrivals/pre-order/",
 ]
 
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
