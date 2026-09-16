@@ -5,8 +5,9 @@ on:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
+# Gives permission to disable workflow via API
 permissions:
-  actions: write # Required permission to disable workflows via GitHub API
+  actions: write
 
 jobs:
   check:
@@ -29,6 +30,6 @@ jobs:
         env:
           SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
           SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Provided automatically by GitHub
-          GITHUB_WORKFLOW_ID: 'check.yml' # The file name of this workflow
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_WORKFLOW_ID: 'check.yml'
         run: python check_beyblade.py
