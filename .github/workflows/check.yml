@@ -18,7 +18,9 @@ jobs:
           python-version: '3.x'
 
       - name: Install Dependencies
-        run: pip install requests beautifulsoup4
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
 
       - name: Run Script
         env:
