@@ -4,10 +4,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from playwright.sync_api import sync_playwright
 
-TARGET_KEYWORD = "Takara Tomy"  # Or "爆旋陀螺"
+# Update keyword if you are searching for '爆旋陀螺' or 'Takara Tomy'
+TARGET_KEYWORD = "Takara"
 URLS = [
-    "https://www.hobbylandeshop.com/product-category/nproduct_booking",
     "https://www.toysrus.com.hk/zh-hk/whats-on/new-arrivals/pre-order/",
+    "https://www.hobbylandeshop.com/product-category/nproduct_booking",
 ]
 
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
@@ -46,7 +47,6 @@ def send_email(found_urls):
 found_urls = []
 
 with sync_playwright() as p:
-    # Launch headless Chromium browser
     browser = p.chromium.launch(headless=True)
     context = browser.new_context(
         user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -55,10 +55,12 @@ with sync_playwright() as p:
     for url in URLS:
         try:
             page = context.new_page()
-            # Wait until network activity settles to ensure JS has rendered products
-            page.goto(url, wait_until="networkidle", timeout=30000)
+            # Fast load state to avoid network tracking timeouts
+            page.goto(url, wait_until="domcontentloaded", timeout=30000)
 
-            # Get complete page text after rendering
+            # Pause briefly to allow basic dynamic elements to populate
+            page.wait_for_timeout(3000)
+
             content = page.content()
 
             if TARGET_KEYWORD in content:
@@ -74,6 +76,5 @@ with sync_playwright() as p:
 
     browser.close()
 
-# Send Email notification if found
 if found_urls:
     send_email(found_urls)
