@@ -2,18 +2,16 @@ import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from bs4 import BeautifulSoup
-import requests
+from playwright.sync_api import sync_playwright
 
-TARGET_KEYWORD = "Takara Tomy"
+TARGET_KEYWORD = "Takara Tomy"  # Or "爆旋陀螺"
 URLS = [
     "https://www.toysrus.com.hk/zh-hk/beyblade/",
     "https://www.hobbylandeshop.com/product-category/nproduct_booking",
 ]
 
-# Email Configuration from Environment Variables
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
-SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD")  # Gmail App Password
+SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD")
 RECEIVER_EMAIL = "yws1024@gmail.com"
 
 
@@ -37,7 +35,6 @@ def send_email(found_urls):
     msg.attach(MIMEText(body, "plain", "utf-8"))
 
     try:
-        # Connect to Gmail SMTP Server (SSL on port 465)
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
             server.send_message(msg)
@@ -46,39 +43,37 @@ def send_email(found_urls):
         print(f"[EMAIL ERROR] Failed to send email: {e}")
 
 
-headers = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/120.0.0.0 Safari/537.36"
-    ),
-    "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-}
-
 found_urls = []
 
-for url in URLS:
-    try:
-        response = requests.get(url, headers=headers, timeout=15)
-        response.encoding = "utf-8"
+with sync_playwright() as p:
+    # Launch headless Chromium browser
+    browser = p.chromium.launch(headless=True)
+    context = browser.new_context(
+        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    )
 
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, "html.parser")
-            page_text = soup.get_text()
+    for url in URLS:
+        try:
+            page = context.new_page()
+            # Wait until network activity settles to ensure JS has rendered products
+            page.goto(url, wait_until="networkidle", timeout=30000)
 
-            if TARGET_KEYWORD in page_text:
+            # Get complete page text after rendering
+            content = page.content()
+
+            if TARGET_KEYWORD in content:
                 print(f"[FOUND] {TARGET_KEYWORD} detected at: {url}")
                 found_urls.append(url)
             else:
                 print(f"[NOT FOUND] {TARGET_KEYWORD} not present at: {url}")
-        else:
-            print(
-                f"[ERROR] Failed to fetch {url} (Status: {response.status_code})"
-            )
 
-    except Exception as e:
-        print(f"[EXCEPTION] Could not reach {url}: {e}")
+            page.close()
 
-# Send Email if keyword found
+        except Exception as e:
+            print(f"[EXCEPTION] Could not fetch {url}: {e}")
+
+    browser.close()
+
+# Send Email notification if found
 if found_urls:
     send_email(found_urls)
