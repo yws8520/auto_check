@@ -1,11 +1,10 @@
 name: Beyblade Stock Checker
 
 on:
-  schedule:
-    - cron: '*/5 * * * *'
+  repository_dispatch:
+    types: [check_stock]
   workflow_dispatch:
 
-# Gives permission to disable workflow via API
 permissions:
   actions: write
 
