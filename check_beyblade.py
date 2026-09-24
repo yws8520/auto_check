@@ -11,6 +11,8 @@ TARGET_KEYWORDS = ["爆旋陀螺", "BX-52", "BX-53"]
 # "https://www.toysrus.com.hk/zh-hk/search/?q=%28%E7%B6%B2%E5%BA%97%E9%A0%90%E8%B3%BC%29+Beyblade+X&lang=zh_HK&cgid=",
 URLS = [
     "https://www.hobbylandeshop.com/product-category/nproduct_booking",
+    "https://fooklemodel.com/product-tag/pre-order/?_stockstatus=1",
+    "https://lastchancetoy.com/search?q=BX-53",
 ]
 
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
