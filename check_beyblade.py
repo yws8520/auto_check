@@ -14,6 +14,7 @@ URLS = [
     "https://www.hobbylandeshop.com/product-category/nproduct_booking",
     "https://www.hobbylandeshop.com/product-category/takaratomy/beyblade%E9%99%80%E8%9E%BA",
     "https://fooklemodel.com/product-tag/pre-order/?_stockstatus=1",
+    "https://lastchancetoy.com/search?q=BeybladeX",
 ]
 
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
