@@ -1,5 +1,6 @@
 import os
 import smtplib
+import urllib.parse
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import requests
@@ -17,13 +18,42 @@ URLS = [
     "https://lastchancetoy.com/search?q=BeybladeX",
 ]
 
+# Credentials
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
 SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD")
-RECEIVER_EMAILS = ["yws1024@gmail.com", ""]
+RECEIVER_EMAILS = ["yws1024@gmail.com"]
 
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
-GITHUB_REPOSITORY = os.environ.get("GITHUB_REPOSITORY")
-GITHUB_WORKFLOW_ID = os.environ.get("GITHUB_WORKFLOW_ID")
+TELEGRAM_GROUP_API_KEY = os.environ.get("TELEGRAM_GROUP_API_KEY")
+
+
+def send_telegram_group_alert(matched_results):
+    if not TELEGRAM_GROUP_API_KEY:
+        print("[TELEGRAM ERROR] TELEGRAM_GROUP_API_KEY secret missing.")
+        return
+
+    # Construct formatted message for Telegram
+    text_lines = ["🎯 Beyblade Stock Alert!", ""]
+    for url, keywords in matched_results.items():
+        kw_str = ", ".join(keywords)
+        text_lines.append(f"• Keywords: {kw_str}")
+        text_lines.append(f"  {url}\n")
+
+    full_message = "\n".join(text_lines)
+
+    # CallMeBot Telegram Group API Endpoint
+    encoded_msg = urllib.parse.quote(full_message)
+    api_url = f"https://api.callmebot.com/telegram/group.php?apikey={TELEGRAM_GROUP_API_KEY}&text={encoded_msg}"
+
+    try:
+        response = requests.get(api_url, timeout=10)
+        if response.status_code == 200:
+            print("[TELEGRAM SUCCESS] Alert sent to Telegram group.")
+        else:
+            print(
+                f"[TELEGRAM ERROR] Failed: {response.status_code} - {response.text}"
+            )
+    except Exception as e:
+        print(f"[TELEGRAM EXCEPTION] Failed to send Telegram message: {e}")
 
 
 def send_email(matched_results):
@@ -31,18 +61,13 @@ def send_email(matched_results):
         print("[EMAIL ERROR] SENDER_EMAIL or SENDER_PASSWORD secret missing.")
         return
 
-    # Build clear details for matched keywords and links
     details_str = ""
     for url, keywords in matched_results.items():
         found_kw_str = ", ".join(keywords)
         details_str += f"• Page: {url}\n  Matched Keyword(s): {found_kw_str}\n\n"
 
-    subject = f"🎯 Stock Alert: Target Keyword Detected!"
-    body = (
-        f"The following target keyword(s) were detected:\n\n"
-        f"{details_str}"
-        f"The workflow has been automatically disabled to stop further emails."
-    )
+    subject = "🎯 Stock Alert: Target Keyword Detected!"
+    body = f"The following target keyword(s) were detected:\n\n{details_str}"
 
     msg = MIMEMultipart()
     msg["From"] = SENDER_EMAIL
@@ -54,28 +79,11 @@ def send_email(matched_results):
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
             server.send_message(msg, to_addrs=RECEIVER_EMAILS)
-        print(f"[EMAIL SUCCESS] Alert email sent to {', '.join(RECEIVER_EMAILS)}")
+        print(
+            f"[EMAIL SUCCESS] Alert email sent to {', '.join(RECEIVER_EMAILS)}"
+        )
     except Exception as e:
         print(f"[EMAIL ERROR] Failed to send email: {e}")
-
-
-def disable_github_workflow():
-    if not GITHUB_TOKEN or not GITHUB_REPOSITORY or not GITHUB_WORKFLOW_ID:
-        print("[GITHUB API ERROR] Missing GitHub environment tokens.")
-        return
-
-    url = f"https://api.github.com/repos/{GITHUB_REPOSITORY}/actions/workflows/{GITHUB_WORKFLOW_ID}/disable"
-    headers = {
-        "Authorization": f"Bearer {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-    }
-
-    response = requests.put(url, headers=headers)
-    if response.status_code == 204:
-        print(f"[GITHUB API SUCCESS] Workflow '{GITHUB_WORKFLOW_ID}' successfully disabled.")
-    else:
-        print(f"[GITHUB API ERROR] Failed to disable workflow: {response.status_code} - {response.text}")
 
 
 # Dictionary to store results: { url: [found_keyword_1, found_keyword_2] }
@@ -102,7 +110,7 @@ with sync_playwright() as p:
                 print(f"[FOUND] Keywords {found_on_page} detected at: {url}")
                 matched_results[url] = found_on_page
             else:
-                print(f"[NOT FOUND] No target keywords present at: {url}")
+                print(f"[NOT FOUND] Target keywords not present at: {url}")
 
             page.close()
 
@@ -111,7 +119,7 @@ with sync_playwright() as p:
 
     browser.close()
 
-# Send Email AND disable workflow if any keyword was found
+# Send Alerts if any keyword was found
 if matched_results:
+    send_telegram_group_alert(matched_results)
     send_email(matched_results)
-    disable_github_workflow()
