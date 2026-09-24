@@ -9,7 +9,7 @@ from playwright.sync_api import sync_playwright
 TARGET_KEYWORDS = ["BX-52", "BX-53"]
 
 # "https://www.toysrus.com.hk/zh-hk/search/?q=%28%E7%B6%B2%E5%BA%97%E9%A0%90%E8%B3%BC%29+Beyblade+X&lang=zh_HK&cgid=",
-#    "https://lastchancetoy.com/search?q=BX-53",
+
 URLS = [
     "https://www.hobbylandeshop.com/product-category/nproduct_booking",
     "https://www.hobbylandeshop.com/product-category/takaratomy/beyblade%E9%99%80%E8%9E%BA",
@@ -19,7 +19,7 @@ URLS = [
 
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
 SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD")
-RECEIVER_EMAILS = ["yws1024@gmail.com", "yws212@ha.org.hk"]
+RECEIVER_EMAILS = ["yws1024@gmail.com", ""]
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 GITHUB_REPOSITORY = os.environ.get("GITHUB_REPOSITORY")
