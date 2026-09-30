@@ -7,7 +7,7 @@ import requests
 from playwright.sync_api import sync_playwright
 
 # List of target keywords to search for
-TARGET_KEYWORDS = ["BX-52", "BX-53"]
+TARGET_KEYWORDS = ["BX-53"]
 
 # "https://www.toysrus.com.hk/zh-hk/search/?q=%28%E7%B6%B2%E5%BA%97%E9%A0%90%E8%B3%BC%29+Beyblade+X&lang=zh_HK&cgid=",
 
