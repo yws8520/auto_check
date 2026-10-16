@@ -12,7 +12,6 @@ TARGET_KEYWORDS = ["CX-20"]
 #https://www.toysrus.com.hk/zh-hk/search/?q=%28%E7%B6%B2%E5%BA%97%E9%A0%90%E8%B3%BC%29+Beyblade+X&lang=zh_HK&cgid=
 #"https://www.toysrus.com.hk/zh-hk/10173908.html"
 URLS = [
-    "https://www.toysrus.com.hk/zh-hk/10173908.html",
     "https://www.hobbylandeshop.com/product-category/nproduct_booking",
     "https://www.hobbylandeshop.com/product-category/takaratomy/beyblade%E9%99%80%E8%9E%BA",
     "https://fooklemodel.com/product-tag/pre-order/?_stockstatus=1",
