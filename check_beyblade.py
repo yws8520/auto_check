@@ -10,7 +10,7 @@ from playwright.sync_api import sync_playwright
 TARGET_KEYWORDS = ["CX-20"]
 
 #https://www.toysrus.com.hk/zh-hk/search/?q=%28%E7%B6%B2%E5%BA%97%E9%A0%90%E8%B3%BC%29+Beyblade+X&lang=zh_HK&cgid=
-
+#"https://www.toysrus.com.hk/zh-hk/10173908.html"
 URLS = [
     "https://www.toysrus.com.hk/zh-hk/10173908.html",
     "https://www.hobbylandeshop.com/product-category/nproduct_booking",
